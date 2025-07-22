@@ -1,0 +1,215 @@
+package frontend
+
+import (
+	"html/template"
+	"net/http"
+)
+
+// IndexHandler 处理首页请求
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := `<!DOCTYPE html>
+<html>
+<head>
+    <title>数据分析平台</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus@2.3.14/dist/index.css">
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-chart-bar"></i> 数据分析平台</h1>
+        
+        <!-- 快速导航栏 -->
+        <nav class="quick-nav" id="quickNav">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>快速导航</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#queries-container" class="nav-link" data-section="queries">
+                        <i class="fas fa-database"></i>
+                        <span>查询区域</span>
+                    </a>
+                    <a href="#comparison-result" class="nav-link" data-section="comparison">
+                        <i class="fas fa-chart-line"></i>
+                        <span>结果合并</span>
+                    </a>
+                    <a href="#analysis-report" class="nav-link" data-section="analysis">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>数据分析</span>
+                    </a>
+                    <a href="#excel-import" class="nav-link" data-section="excel">
+                        <i class="fas fa-file-excel"></i>
+                        <span>Excel导入</span>
+                    </a>
+                </div>
+                <div class="nav-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- 标签页导航 -->
+        <div class="tabs" id="query-tabs">
+            <div class="tab active" data-tab="1" onclick="switchTab(1)">
+                <i class="fas fa-database"></i> 查询 1
+            </div>
+            <div class="tab" data-tab="2" onclick="switchTab(2)">
+                <i class="fas fa-database"></i> 查询 2
+            </div>
+            <div class="tab" data-tab="3" onclick="switchTab(3)">
+                <i class="fas fa-database"></i> 查询 3
+            </div>
+            <button class="new-tab" onclick="addQuery()">
+                <i class="fas fa-plus"></i> 新查询
+            </button>
+        </div>
+        
+        <!-- 查询容器 -->
+        <div id="queries-container">
+            <div class="query-container active" id="query-1">
+                <textarea class="sql-query" placeholder="输入SQL查询语句...">SELECT ref_field as lable, count(*) as 'value' FROM pro_refs GROUP BY ref_field;</textarea>
+                <button onclick="executeQuery(1)"><i class="fas fa-play"></i> 执行查询</button>
+                <div class="error"></div>
+                <div class="visual-controls" style="display:none;"></div>
+                <div class="result"></div>
+            </div>
+            <div class="query-container" id="query-2">
+                <textarea class="sql-query" placeholder="输入SQL查询语句...">SELECT ref_field as lable, count(*) as 'value' FROM pro_refs GROUP BY ref_field;</textarea>
+                <button onclick="executeQuery(2)"><i class="fas fa-play"></i> 执行查询</button>
+                <div class="error"></div>
+                <div class="visual-controls" style="display:none;"></div>
+                <div class="result"></div>
+            </div>
+            <div class="query-container" id="query-3">
+                <textarea class="sql-query" placeholder="输入SQL查询语句...">SELECT ref_field as lable, count(*) as 'value' FROM pro_refs GROUP BY ref_field;</textarea>
+                <button onclick="executeQuery(3)"><i class="fas fa-play"></i> 执行查询</button>
+                <div class="error"></div>
+                <div class="visual-controls" style="display:none;"></div>
+                <div class="result"></div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;" class="action-buttons">
+            <button class="execute-all-btn" onclick="executeAllQueries()"><i class="fas fa-play-circle"></i> 一键执行所有查询</button>
+            <button class="compare-btn" onclick="compareQueries()"><i class="fas fa-chart-line"></i> 合并查询结果</button>
+            <button class="analyze-btn" onclick="analyzeResults()"><i class="fas fa-chart-pie"></i> 数据分析报表</button>
+        </div>
+        
+        <div id="comparison-result" style="margin-top: 30px;"></div>
+        
+        <!-- 数据分析报表区域 -->
+        <div id="analysis-report" style="margin-top: 30px; display: none;">
+            <h2><i class="fas fa-chart-pie"></i> 数据分析报表</h2>
+            <div class="analysis-dimensions" style="margin-bottom: 20px;">
+                <h3>选择分析维度</h3>
+                <div class="dimension-options" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                    <div class="dimension-group">
+                        <h4>基础分析</h4>
+                        <label><input type="checkbox" class="dimension-checkbox" value="overview" checked> 数据概览</label>
+                        <label><input type="checkbox" class="dimension-checkbox" value="statistics" checked> 统计分析</label>
+                        <label><input type="checkbox" class="dimension-checkbox" value="quality" checked> 数据质量分析</label>
+                    </div>
+                    <div class="dimension-group">
+                        <h4>高级分析</h4>
+                        <label><input type="checkbox" class="dimension-checkbox" value="distribution" checked> 分布分析</label>
+                        <label><input type="checkbox" class="dimension-checkbox" value="outliers" checked> 异常值检测</label>
+                        <label><input type="checkbox" class="dimension-checkbox" value="correlation" checked> 相关性分析</label>
+                    </div>
+                    <div class="dimension-group">
+                        <h4>智能分析</h4>
+                        <label><input type="checkbox" class="dimension-checkbox" value="insights" checked> 自动洞察</label>
+                        <label><input type="checkbox" class="dimension-checkbox" value="trends" checked> 趋势分析</label>
+                        <label><input type="checkbox" class="dimension-checkbox" value="patterns" checked> 模式识别</label>
+                    </div>
+                    <div class="dimension-group">
+                        <h4>业务维度</h4>
+                        <label><input type="checkbox" class="dimension-checkbox" value="business_impact" checked> 业务影响分析</label>
+                        <label><input type="checkbox" class="dimension-checkbox" value="time_series" checked> 时间序列分析</label>
+                        <label><input type="checkbox" class="dimension-checkbox" value="segmentation" checked> 数据分类分析</label>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <button id="select-all-dimensions" class="dimension-btn">全选</button>
+                        <button id="deselect-all-dimensions" class="dimension-btn">取消全选</button>
+                    </div>
+                    <button id="apply-dimensions" class="dimension-apply-btn">应用选择的维度</button>
+                </div>
+            </div>
+            <div class="report-content"></div>
+        </div>
+        
+        <!-- Excel导入区域 -->
+        <div id="excel-import" class="excel-import" style="margin-top: 30px; padding: 15px; border: 1px dashed #ccc; border-radius: 5px;">
+            <h3><i class="fas fa-file-excel"></i> Excel导入</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                <input type="file" id="excel-file" accept=".xlsx,.xls">
+                <button onclick="importExcel()"><i class="fas fa-upload"></i> 导入并执行</button>
+                <button onclick="downloadExcelTemplate()"><i class="fas fa-download"></i> 下载Excel模板</button>
+            </div>
+            <div id="import-status"></div>
+        </div>
+        
+        <footer style="text-align: center; margin-top: 50px; color: #7f8c8d; font-size: 14px;">
+            <p>数据分析Web平台 - 基于Go语言的MySQL数据查询可视化工具</p>
+        </footer>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="/static/js/data-analysis-rules.js"></script>
+    <script src="/static/js/report-generator.js"></script>
+    <script src="/static/js/fallback-analyzer.js"></script>
+    <script src="/static/js/data-analyzer.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script>
+        // 快速导航吸顶效果
+        window.addEventListener('scroll', function() {
+            const nav = document.getElementById('quickNav');
+            const navTop = nav.offsetTop;
+            
+            if (window.pageYOffset >= navTop) {
+                nav.classList.add('sticky');
+                document.body.style.paddingTop = nav.offsetHeight + 'px';
+            } else {
+                nav.classList.remove('sticky');
+                document.body.style.paddingTop = '0';
+            }
+        });
+        
+        // 导航链接点击平滑滚动
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    const navHeight = document.getElementById('quickNav').offsetHeight;
+                    const targetPosition = targetElement.offsetTop - navHeight - 20;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                    
+                    // 更新活跃状态
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+        
+        // 移动端导航切换
+        document.querySelector('.nav-toggle').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('show');
+        });
+    </script>
+</body>
+</html>`
+
+	t, _ := template.New("index").Parse(tmpl)
+	t.Execute(w, nil)
+}
