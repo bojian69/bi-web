@@ -1,0 +1,38 @@
+/* 分析表格样式 */
+.analysis-table th {
+    background-color: #5a5e62 !important;
+    color: #000000 !important;
+    font-weight: 600;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+/* 确保其他分析表格也使用相同样式 */
+.column-type-analysis th,
+.outlier-analysis th,
+.data-distribution-analysis th {
+    background-color: #5a5e62 !important;
+    color: #000000 !important;
+}
+
+/* 表格基本样式 */
+.analysis-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.analysis-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.analysis-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.analysis-table tr:hover {
+    background-color: #f1f4f7;
+}
