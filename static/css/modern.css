@@ -325,7 +325,7 @@ body {
 }
 
 .el-table th {
-  background-color: #f5f7fa;
+  background-color: #5a5e62;
   padding: 12px 0;
   font-weight: 600;
   color: var(--text-color);
