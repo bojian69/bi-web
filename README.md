@@ -196,23 +196,132 @@ go run main.go
 ### 🐳 Docker部署
 
 #### 单容器部署
+
+##### 基本部署
 ```bash
 # 构建镜像
-docker build -t bi-web .
+docker build -t bi-web:latest .
 
-# 运行容器
+# 运行容器 (使用.env文件)
 docker run -d \
   --name bi-web \
-  -p 8080:8080 \
-  -e DB_HOST=your_mysql_host \
-  -e DB_USER=your_username \
-  -e DB_PASSWORD=your_password \
-  -e DB_NAME=your_database \
+  -p 8081:8081 \
+  --env-file .env \
   -v $(pwd)/log:/app/log \
-  bi-web
+  --restart unless-stopped \
+  bi-web:latest
+```
+
+##### 直接指定环境变量
+```bash
+# 运行容器 (直接指定环境变量)
+docker run -d \
+  --name bi-web \
+  -p 8081:8081 \
+  -e DB_HOST=mysql-server \
+  -e DB_PORT=3306 \
+  -e DB_USER=root \
+  -e DB_PASSWORD=password \
+  -e DB_NAME=bi_database \
+  -e PORT=8081 \
+  -v $(pwd)/log:/app/log \
+  --restart unless-stopped \
+  bi-web:latest
+```
+
+##### 连接宿主机MySQL
+```bash
+# 运行容器 (连接宿主机MySQL)
+docker run -d \
+  --name bi-web \
+  -p 8081:8081 \
+  --env-file .env \
+  -e DB_HOST=host.docker.internal \
+  -v $(pwd)/log:/app/log \
+  --add-host=host.docker.internal:host-gateway \
+  --restart unless-stopped \
+  bi-web:latest
+```
+
+##### 使用网络模式
+```bash
+# 创建网络
+docker network create bi-network
+
+# 运行 MySQL
+docker run -d \
+  --name bi-mysql \
+  --network bi-network \
+  -e MYSQL_ROOT_PASSWORD=rootpassword \
+  -e MYSQL_DATABASE=bi_database \
+  -e MYSQL_USER=biuser \
+  -e MYSQL_PASSWORD=bipassword \
+  -v mysql_data:/var/lib/mysql \
+  mysql:8.0
+
+# 运行应用
+docker run -d \
+  --name bi-web \
+  --network bi-network \
+  -p 8081:8081 \
+  -e DB_HOST=bi-mysql \
+  -e DB_USER=biuser \
+  -e DB_PASSWORD=bipassword \
+  -e DB_NAME=bi_database \
+  -v $(pwd)/log:/app/log \
+  --restart unless-stopped \
+  bi-web:latest
 ```
 
 #### Docker Compose部署 (推荐)
+
+##### docker-compose.yml 示例
+```yaml
+version: '3.8'
+
+services:
+  bi-web:
+    build: .
+    image: bi-web:latest
+    container_name: bi-web
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    # 同时支持从.env文件和环境变量读取配置
+    env_file:
+      - .env
+    # 这里的环境变量会覆盖.env文件中的同名变量
+    environment:
+      - DB_HOST=${DB_HOST:-mysql}  # 默认使用容器服务名，可被.env或环境变量覆盖
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USER=${DB_USER:-biuser}
+      - DB_PASSWORD=${DB_PASSWORD:-bipassword}
+      - DB_NAME=${DB_NAME:-bi_database}
+      - PORT=${PORT:-8081}
+    volumes:
+      - ./log:/app/log
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    container_name: bi-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=bi_database
+      - MYSQL_USER=biuser
+      - MYSQL_PASSWORD=bipassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+volumes:
+  mysql_data:
+```
+
+##### 常用命令
 ```bash
 # 一键启动 (包含MySQL)
 docker compose up -d
@@ -220,9 +329,23 @@ docker compose up -d
 # 查看日志
 docker compose logs -f
 
+# 仅查看应用日志
+docker compose logs -f bi-web
+
 # 停止服务
 docker compose down
+
+# 停止服务并删除卷
+docker compose down -v
+
+# 重新构建并启动
+docker compose up -d --build
 ```
+
+##### 生产环境部署提示
+- 生产环境中请修改默认密码
+- 考虑使用外部数据库或数据卷备份策略
+- 配置反向代理(如Nginx)以启用HTTPS
 
 ## ⚙️ 配置说明
 
@@ -236,6 +359,15 @@ docker compose down
 | `DB_PASSWORD` | 数据库密码 | - | ✅ |
 | `DB_NAME` | 数据库名称 | `test` | ✅ |
 | `PORT` | Web服务端口 | `8081` | ❌ |
+
+### 配置优先级
+
+配置加载顺序（优先级从高到低）：
+
+1. 命令行环境变量（如 `docker run -e DB_HOST=custom-host ...`）
+2. docker-compose.yml 中的 environment 变量
+3. .env 文件中的变量
+4. 应用程序默认值
 
 ### 配置文件示例
 

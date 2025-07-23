@@ -3,31 +3,26 @@ version: '3.8'
 services:
   bi-web:
     build: .
+    container_name: bi-web
     ports:
-      - "8080:8080"
+      - "8081:8081"
+    # 同时支持从.env文件和环境变量读取配置
+    env_file:
+      - .env
+    # 这里的环境变量会覆盖.env文件中的同名变量
     environment:
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=password
-      - DB_NAME=test
-      - PORT=8080
+      # 可以根据需要启用或调整以下变量
+      - DB_HOST=${DB_HOST:-mysql}  # 默认使用容器服务名，可被.env或环境变量覆盖
+      # - DB_HOST=host.docker.internal  # 连接宿主机MySQL
     volumes:
       - ./log:/app/log
-    depends_on:
-      - mysql
     restart: unless-stopped
-
-  mysql:
-    image: mysql:8.0
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_DATABASE=test
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    restart: unless-stopped
-
-volumes:
-  mysql_data:
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    # 添加网络配置，允许容器访问宿主机
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
