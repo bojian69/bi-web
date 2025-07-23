@@ -195,6 +195,19 @@ go run main.go
 
 ### 🐳 Docker部署
 
+#### 镜像推送到远程仓库
+
+```bash
+# 使用推送脚本 (默认推送到Docker Hub)
+./scripts/push-docker.sh
+
+# 指定自定义仓库和标签
+./scripts/push-docker.sh registry.example.com/myuser v1.0.0
+
+./scripts/push-docker.sh bojianli69 v25.7.23
+
+```
+
 #### 单容器部署
 
 ##### 基本部署
@@ -282,7 +295,7 @@ version: '3.8'
 services:
   bi-web:
     build: .
-    image: bi-web:latest
+    image: ${DOCKER_REGISTRY:-localhost}/bi-web:${TAG:-latest}  # 支持远程仓库部署
     container_name: bi-web
     restart: unless-stopped
     ports:

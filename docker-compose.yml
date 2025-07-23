@@ -3,6 +3,7 @@ version: '3.8'
 services:
   bi-web:
     build: .
+    image: ${DOCKER_REGISTRY:-localhost}/bi-web:${TAG:-latest}  # 支持推送到远程仓库
     container_name: bi-web
     ports:
       - "8081:8081"
