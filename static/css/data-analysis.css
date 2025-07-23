@@ -1,0 +1,133 @@
+/* 数据分析表格专用样式 */
+
+/* 列类型分析表格 */
+.column-type-analysis {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.column-type-analysis th {
+  background-color: #f8f9fa;
+  color: #000000;
+  font-weight: 600;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.column-type-analysis td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+  color: #000000;
+}
+
+.column-type-analysis tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* 异常值分析表格 */
+.outlier-analysis {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.outlier-analysis th {
+  background-color: #f8f9fa;
+  color: #000000;
+  font-weight: 600;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.outlier-analysis td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+  color: #000000;
+}
+
+.outlier-analysis tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* 异常值高亮 */
+.outlier-analysis .outlier {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* 数据分布分析表格 */
+.data-distribution-analysis {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.data-distribution-analysis th {
+  background-color: #f8f9fa;
+  color: #000000;
+  font-weight: 600;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.data-distribution-analysis td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+  color: #000000;
+}
+
+.data-distribution-analysis tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* 分析结果标题 */
+.analysis-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000000;
+  margin: 20px 0 10px 0;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+/* 分析结果容器 */
+.analysis-container {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 分析摘要 */
+.analysis-summary {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-left: 4px solid #3498db;
+  color: #000000;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .column-type-analysis th,
+  .outlier-analysis th,
+  .data-distribution-analysis th,
+  .column-type-analysis td,
+  .outlier-analysis td,
+  .data-distribution-analysis td {
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  
+  .analysis-title {
+    font-size: 16px;
+  }
+}

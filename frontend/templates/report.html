@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据分析报表</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/data-table.css">
+    <link rel="stylesheet" href="/static/css/data-analysis.css">
+    <link rel="stylesheet" href="/static/css/table-override.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>数据分析报表</h1>
+        <p>查询结果与数据分布分析</p>
+    </header>
+
+    <main>
+        <section class="query-section">
+            <h2>查询结果</h2>
+            
+            <div class="table-container">
+                <table class="data-table query-result">
+                    <thead>
+                        <tr>
+                            <th>部门</th>
+                            <th>员工数量</th>
+                            <th>平均工资</th>
+                            <th>总成本</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>研发部</td>
+                            <td>42</td>
+                            <td>15000</td>
+                            <td>630000</td>
+                        </tr>
+                        <tr>
+                            <td>市场部</td>
+                            <td>28</td>
+                            <td>12500</td>
+                            <td>350000</td>
+                        </tr>
+                        <tr>
+                            <td>销售部</td>
+                            <td>35</td>
+                            <td>13800</td>
+                            <td>483000</td>
+                        </tr>
+                        <tr>
+                            <td>人力资源</td>
+                            <td>15</td>
+                            <td>11200</td>
+                            <td>168000</td>
+                        </tr>
+                        <tr>
+                            <td>财务部</td>
+                            <td>12</td>
+                            <td>14300</td>
+                            <td>171600</td>
+                        </tr>
+                        <tr>
+                            <td>行政部</td>
+                            <td>8</td>
+                            <td>9800</td>
+                            <td>78400</td>
+                        </tr>
+                        <tr>
+                            <td>客服部</td>
+                            <td>22</td>
+                            <td>10500</td>
+                            <td>231000</td>
+                        </tr>
+                        <tr>
+                            <td>产品部</td>
+                            <td>18</td>
+                            <td>16200</td>
+                            <td>291600</td>
+                        </tr>
+                        <tr>
+                            <td>设计部</td>
+                            <td>14</td>
+                            <td>14800</td>
+                            <td>207200</td>
+                        </tr>
+                        <tr>
+                            <td>法务部</td>
+                            <td>6</td>
+                            <td>17500</td>
+                            <td>105000</td>
+                        </tr>
+                        <tr>
+                            <td>质量控制</td>
+                            <td>10</td>
+                            <td>13200</td>
+                            <td>132000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 分布分析结果将自动插入到这里 -->
+        </section>
+        
+        <section class="visualization-section">
+            <h2>可视化分析</h2>
+            
+            <div class="chart-options">
+                <button class="chart-btn active" data-chart="bar">柱状图</button>
+                <button class="chart-btn" data-chart="pie">饼图</button>
+                <button class="chart-btn" data-chart="line">折线图</button>
+            </div>
+            
+            <div class="chart-wrapper">
+                <canvas id="main-chart"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 数据分析Web平台</p>
+    </footer>
+
+    <script src="/static/js/table-style-fix.js"></script>
+    <script src="/static/js/data-analyzer.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据分析示例</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/data-table.css">
+    <link rel="stylesheet" href="/static/css/data-analysis.css">
+    <link rel="stylesheet" href="/static/css/table-override.css">
+    <style>
+        /* 直接内联样式覆盖 */
+        th {
+            color: #000000 !important;
+            background-color: #3498db !important;
+        }
+        .column-type-analysis th,
+        .outlier-analysis th,
+        .data-distribution-analysis th {
+            color: #000000 !important;
+            background-color: #3498db !important;
+            font-weight: 600 !important;
+            border-bottom: 1px solid #ddd !important;
+        }
+        .analysis-title {
+            color: #000000 !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>数据分析报告</h1>
+        <p>列类型分析、异常值分析和数据分布分析</p>
+    </header>
+
+    <main>
+        <!-- 列类型分析 -->
+        <section class="analysis-container">
+            <h2 class="analysis-title">列类型分析</h2>
+            <div class="analysis-summary">
+                <p>此分析显示了数据集中各列的数据类型、非空值数量和唯一值数量。</p>
+            </div>
+            
+            <table class="column-type-analysis">
+                <thead style="background-color: #3498db;">
+                    <tr>
+                        <th style="color: #000000 !important; background-color: #3498db;">列名</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">数据类型</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">非空值数</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">唯一值数</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">示例值</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>id</td>
+                        <td>INTEGER</td>
+                        <td>1000</td>
+                        <td>1000</td>
+                        <td>1, 2, 3</td>
+                    </tr>
+                    <tr>
+                        <td>name</td>
+                        <td>VARCHAR</td>
+                        <td>998</td>
+                        <td>950</td>
+                        <td>张三, 李四, 王五</td>
+                    </tr>
+                    <tr>
+                        <td>age</td>
+                        <td>INTEGER</td>
+                        <td>980</td>
+                        <td>75</td>
+                        <td>18, 25, 42</td>
+                    </tr>
+                    <tr>
+                        <td>email</td>
+                        <td>VARCHAR</td>
+                        <td>950</td>
+                        <td>950</td>
+                        <td>user@example.com</td>
+                    </tr>
+                    <tr>
+                        <td>created_at</td>
+                        <td>DATETIME</td>
+                        <td>1000</td>
+                        <td>995</td>
+                        <td>2023-01-15 14:30:00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 异常值分析 -->
+        <section class="analysis-container">
+            <h2 class="analysis-title">异常值分析</h2>
+            <div class="analysis-summary">
+                <p>此分析检测数值列中的异常值，使用标准差方法（超过3个标准差）。</p>
+            </div>
+            
+            <table class="outlier-analysis">
+                <thead style="background-color: #3498db;">
+                    <tr>
+                        <th style="color: #000000 !important; background-color: #3498db;">列名</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">异常值数量</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">异常值百分比</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">最小正常值</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">最大正常值</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>age</td>
+                        <td>5</td>
+                        <td>0.5%</td>
+                        <td>18</td>
+                        <td>65</td>
+                    </tr>
+                    <tr class="outlier">
+                        <td>salary</td>
+                        <td>12</td>
+                        <td>1.2%</td>
+                        <td>5000</td>
+                        <td>25000</td>
+                    </tr>
+                    <tr>
+                        <td>login_count</td>
+                        <td>8</td>
+                        <td>0.8%</td>
+                        <td>0</td>
+                        <td>120</td>
+                    </tr>
+                    <tr class="outlier">
+                        <td>order_amount</td>
+                        <td>15</td>
+                        <td>1.5%</td>
+                        <td>10</td>
+                        <td>5000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 数据分布分析 -->
+        <section class="analysis-container">
+            <h2 class="analysis-title">数据分布分析</h2>
+            <div class="analysis-summary">
+                <p>此分析显示了数值列的分布统计信息，包括均值、中位数、标准差等。</p>
+            </div>
+            
+            <table class="data-distribution-analysis">
+                <thead style="background-color: #3498db;">
+                    <tr>
+                        <th style="color: #000000 !important; background-color: #3498db;">列名</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">均值</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">中位数</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">标准差</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">最小值</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">最大值</th>
+                        <th style="color: #000000 !important; background-color: #3498db;">分布类型</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>age</td>
+                        <td>35.4</td>
+                        <td>32</td>
+                        <td>12.3</td>
+                        <td>18</td>
+                        <td>85</td>
+                        <td>正态分布</td>
+                    </tr>
+                    <tr>
+                        <td>salary</td>
+                        <td>12500</td>
+                        <td>10800</td>
+                        <td>5200</td>
+                        <td>3500</td>
+                        <td>85000</td>
+                        <td>右偏分布</td>
+                    </tr>
+                    <tr>
+                        <td>login_count</td>
+                        <td>45.2</td>
+                        <td>38</td>
+                        <td>28.7</td>
+                        <td>0</td>
+                        <td>230</td>
+                        <td>右偏分布</td>
+                    </tr>
+                    <tr>
+                        <td>order_amount</td>
+                        <td>850.5</td>
+                        <td>450</td>
+                        <td>1200.3</td>
+                        <td>5</td>
+                        <td>15000</td>
+                        <td>极度右偏</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 数据分析Web平台</p>
+    </footer>
+
+    <!-- 暂时移除可能导致错误的脚本 -->
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!-- 在HTML头部引入样式文件 -->
+<link rel="stylesheet" href="/static/css/data-table.css">
+<link rel="stylesheet" href="/static/css/table-override.css">
+
+<!-- 示例表格 -->
+<div class="table-container">
+  <table class="data-table">
+    <thead style="background: #f8f9fa;">
+      <tr>
+        <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">列名</th>
+        <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">数据类型</th>
+        <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">非空值数</th>
+        <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">唯一值数</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>id</td>
+        <td>INTEGER</td>
+        <td>1000</td>
+        <td>1000</td>
+      </tr>
+      <tr>
+        <td>name</td>
+        <td>VARCHAR</td>
+        <td>998</td>
+        <td>950</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 
+注意：确保CSS加载顺序正确，table-override.css 必须在其他样式表之后加载，
+以确保它的规则具有更高的优先级。
+-->

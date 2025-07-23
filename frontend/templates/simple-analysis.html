@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据分析表格</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 表头样式 - 黑色字体 */
+        th {
+            background-color: #f8f9fa;
+            color: #000000;
+            font-weight: 600;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        /* 表格单元格样式 */
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        /* 交替行颜色 */
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        /* 分析容器 */
+        .analysis-section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 分析标题 */
+        .analysis-title {
+            color: #000000;
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <h1>数据分析报表</h1>
+    
+    <div class="analysis-section">
+        <h2 class="analysis-title">列类型分析</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>列名</th>
+                    <th>数据类型</th>
+                    <th>非空值数</th>
+                    <th>唯一值数</th>
+                    <th>示例值</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>id</td>
+                    <td>INTEGER</td>
+                    <td>1000</td>
+                    <td>1000</td>
+                    <td>1, 2, 3</td>
+                </tr>
+                <tr>
+                    <td>name</td>
+                    <td>VARCHAR</td>
+                    <td>998</td>
+                    <td>950</td>
+                    <td>张三, 李四, 王五</td>
+                </tr>
+                <tr>
+                    <td>age</td>
+                    <td>INTEGER</td>
+                    <td>980</td>
+                    <td>75</td>
+                    <td>18, 25, 42</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="analysis-section">
+        <h2 class="analysis-title">异常值分析</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>列名</th>
+                    <th>异常值数量</th>
+                    <th>异常值百分比</th>
+                    <th>最小正常值</th>
+                    <th>最大正常值</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>age</td>
+                    <td>5</td>
+                    <td>0.5%</td>
+                    <td>18</td>
+                    <td>65</td>
+                </tr>
+                <tr>
+                    <td>salary</td>
+                    <td>12</td>
+                    <td>1.2%</td>
+                    <td>5000</td>
+                    <td>25000</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="analysis-section">
+        <h2 class="analysis-title">数据分布分析</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>列名</th>
+                    <th>均值</th>
+                    <th>中位数</th>
+                    <th>标准差</th>
+                    <th>最小值</th>
+                    <th>最大值</th>
+                    <th>分布类型</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>age</td>
+                    <td>35.4</td>
+                    <td>32</td>
+                    <td>12.3</td>
+                    <td>18</td>
+                    <td>85</td>
+                    <td>正态分布</td>
+                </tr>
+                <tr>
+                    <td>salary</td>
+                    <td>12500</td>
+                    <td>10800</td>
+                    <td>5200</td>
+                    <td>3500</td>
+                    <td>85000</td>
+                    <td>右偏分布</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

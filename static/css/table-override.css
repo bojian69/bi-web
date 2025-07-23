@@ -1,0 +1,66 @@
+/* 表格样式覆盖 - 确保所有表头使用黑色字体 */
+
+/* 直接覆盖内联样式 */
+thead[style*="background"] th,
+thead[style*="background"] th[style*="color"],
+th[style*="color"] {
+  color: #000000 !important;
+}
+
+/* 覆盖所有表格标题 */
+table th,
+.data-table th,
+table.query-result th,
+.table-header th,
+.table-view th {
+  color: #000000 !important;
+  background-color: #f8f9fa !important;
+}
+
+/* 确保表格内容也使用黑色字体 */
+table td,
+.data-table td,
+table.query-result td {
+  color: #000000 !important;
+}
+
+/* 特定针对您提供的表格样式 */
+thead[style*="background: #f8f9fa"] tr th {
+  color: #000000 !important;
+  padding: 8px !important;
+  text-align: left !important;
+  border-bottom: 1px solid #ddd !important;
+}
+
+/* 列类型分析、异常值分析的表格标题 */
+.column-type-analysis th,
+.outlier-analysis th,
+.data-distribution-analysis th,
+.column-analysis th,
+.data-profile th,
+.data-summary th,
+.data-quality th,
+.data-stats th,
+div[class*="column"] th,
+div[class*="analysis"] th,
+div[class*="profile"] th,
+div[class*="summary"] th {
+  color: #000000 !important;
+  background-color: #f8f9fa !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid #ddd !important;
+}
+
+/* 分析结果标题 */
+.analysis-title,
+.analysis-header,
+.section-title,
+h2.analysis,
+h3.analysis,
+h4.analysis,
+div[class*="analysis"] h2,
+div[class*="analysis"] h3,
+div[class*="analysis"] h4 {
+  color: #000000 !important;
+  font-weight: 600 !important;
+}

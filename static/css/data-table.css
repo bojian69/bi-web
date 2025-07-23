@@ -1,0 +1,144 @@
+/* 数据分析报表表格通用样式 */
+
+/* 基础表格样式 */
+.data-table, table.query-result {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+  color: #333; /* 默认文本颜色为深灰色 */
+}
+
+/* 表头样式 */
+.data-table th, table.query-result th {
+  background-color: #f8f9fa;
+  color: #000000; /* 黑色字体 */
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid #ddd;
+}
+
+/* 表格单元格样式 */
+.data-table td, table.query-result td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  color: #000000; /* 黑色字体 */
+}
+
+/* 表格行交替颜色 */
+.data-table tbody tr:nth-child(even), table.query-result tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.data-table tbody tr:hover, table.query-result tbody tr:hover {
+  background-color: #f1f4f7;
+}
+
+/* 数值列右对齐 */
+.data-table td.number, table.query-result td.number {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+
+/* 表格分页控件 */
+.table-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0;
+}
+
+.table-pagination button {
+  background-color: #3498db;
+  color: #ffffff;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.table-pagination button:hover {
+  background-color: #2980b9;
+}
+
+.table-pagination button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+/* 分布分析样式 */
+.distribution-analysis {
+  margin: 25px 0;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  border-left: 4px solid #3498db;
+}
+
+.distribution-analysis h3 {
+  margin-top: 0;
+  color: #000000; /* 黑色字体 */
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.stat-card {
+  background-color: white;
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card .stat-label {
+  font-size: 12px;
+  color: #333333; /* 深灰色字体 */
+  margin-bottom: 5px;
+}
+
+.stat-card .stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000000; /* 黑色字体 */
+}
+
+/* 数据可视化容器 */
+.chart-container {
+  margin: 20px 0;
+  height: 300px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .data-table, table.query-result {
+    font-size: 12px;
+  }
+  
+  .data-table th, table.query-result th,
+  .data-table td, table.query-result td {
+    padding: 8px 10px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 内联表格样式覆盖 */
+thead[style*="background: #f8f9fa"] th {
+  color: #000000 !important; /* 强制黑色字体 */
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
