@@ -1,0 +1,305 @@
+/* SQL编辑器样式 */
+.sql-editor-container {
+    position: relative;
+    margin: 15px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.sql-editor-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sql-editor-header i {
+    margin-right: 8px;
+}
+
+.sql-editor-tools {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.sql-editor-tool {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.3s;
+}
+
+.sql-editor-tool:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.sql-textarea {
+    width: 100%;
+    min-height: 150px;
+    max-height: 400px;
+    padding: 15px;
+    border: none;
+    outline: none;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 21px;
+    resize: vertical;
+    background: #fafafa;
+    color: #333;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #f0f0f0;
+}
+
+.sql-textarea::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.sql-textarea::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}
+
+.sql-textarea::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.sql-textarea::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+.sql-textarea:focus {
+    background: #fff;
+    box-shadow: inset 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* SQL语法高亮 */
+.sql-keyword {
+    color: #0066cc;
+    font-weight: bold;
+}
+
+.sql-string {
+    color: #009900;
+}
+
+.sql-number {
+    color: #cc6600;
+}
+
+.sql-comment {
+    color: #999;
+    font-style: italic;
+}
+
+.sql-operator {
+    color: #666;
+}
+
+/* 行号显示 */
+.sql-editor-with-lines {
+    display: flex;
+    background: #fafafa;
+    overflow: hidden;
+}
+
+.sql-line-numbers {
+    background: #f0f0f0;
+    color: #999;
+    padding: 15px 10px 15px 5px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 21px;
+    text-align: right;
+    border-right: 1px solid #ddd;
+    user-select: none;
+    min-width: 50px;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    /* 隐藏滚动条 */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sql-line-numbers::-webkit-scrollbar {
+    display: none;
+}
+
+.line-number {
+    height: 21px;
+    line-height: 21px;
+    padding-right: 8px;
+    text-align: right;
+    white-space: nowrap;
+    display: block;
+    box-sizing: border-box;
+}
+
+.sql-content {
+    flex: 1;
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* 自动完成提示 */
+.sql-autocomplete {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+}
+
+.sql-autocomplete-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.sql-autocomplete-item:hover,
+.sql-autocomplete-item.selected {
+    background: #e3f2fd;
+}
+
+.sql-autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.sql-autocomplete-keyword {
+    color: #0066cc;
+    font-weight: bold;
+}
+
+.sql-autocomplete-table {
+    color: #cc6600;
+}
+
+.sql-autocomplete-column {
+    color: #009900;
+}
+
+/* 错误提示 */
+.sql-error-line {
+    background: rgba(255, 0, 0, 0.1);
+    border-left: 3px solid #ff0000;
+}
+
+.sql-error-tooltip {
+    position: absolute;
+    background: #ff4444;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1001;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* 格式化按钮 */
+.sql-format-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+}
+
+.sql-format-btn:hover {
+    opacity: 1;
+}
+
+/* 全屏模式 */
+.sql-editor-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: white;
+}
+
+.sql-editor-fullscreen .sql-textarea {
+    min-height: calc(100vh - 100px);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .sql-editor-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .sql-editor-tools {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .sql-textarea {
+        font-size: 16px; /* 防止iOS缩放 */
+    }
+    
+    .sql-line-numbers {
+        display: none; /* 移动端隐藏行号 */
+    }
+}
+
+/* 深色主题 */
+.sql-editor-dark {
+    background: #2d3748;
+    color: #e2e8f0;
+}
+
+.sql-editor-dark .sql-textarea {
+    background: #2d3748;
+    color: #e2e8f0;
+}
+
+.sql-editor-dark .sql-keyword {
+    color: #63b3ed;
+}
+
+.sql-editor-dark .sql-string {
+    color: #68d391;
+}
+
+.sql-editor-dark .sql-number {
+    color: #f6ad55;
+}
+
+.sql-editor-dark .sql-comment {
+    color: #a0aec0;
+}

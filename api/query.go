@@ -13,12 +13,7 @@ type QueryRequest struct {
 	Query string `json:"query"`
 }
 
-// QueryResult 查询结果结构
-type QueryResult struct {
-	Columns []string        `json:"columns"`
-	Rows    [][]interface{} `json:"rows"`
-	Error   string          `json:"error,omitempty"`
-}
+
 
 // QueryHandler 处理SQL查询请求
 func QueryHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,6 +37,6 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 	if result.Error != "" {
 		log.Printf("查询错误: %s", result.Error)
 	} else {
-		log.Printf("查询成功: 返回 %d 行数据", len(result.Rows))
+		log.Printf("查询成功: 返回 %d 行数据, 耗时: %s", len(result.Rows), result.Duration)
 	}
 }

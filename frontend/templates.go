@@ -14,8 +14,14 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/sql-editor.css">
+    <link rel="stylesheet" href="/static/css/advanced-sql-editor.css">
+    <link rel="stylesheet" href="/static/css/editor-manager.css">
+    <link rel="stylesheet" href="/static/css/query-actions.css">
+    <link rel="stylesheet" href="/static/css/excel-import.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus@2.3.14/dist/index.css">
+
 </head>
 <body>
     <div class="container">
@@ -71,22 +77,43 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
         <!-- 查询容器 -->
         <div id="queries-container">
             <div class="query-container active" id="query-1">
-                <textarea class="sql-query" placeholder="输入SQL查询语句...">SELECT ref_field as lable, count(*) as 'value' FROM pro_refs GROUP BY ref_field;</textarea>
-                <button onclick="executeQuery(1)"><i class="fas fa-play"></i> 执行查询</button>
+                <div class="sql-editor-container" id="sql-editor-1"></div>
+                <div class="query-actions">
+                    <button class="execute-btn" onclick="executeQuery(1)">
+                        <i class="fas fa-play"></i> 执行查询
+                    </button>
+                    <button class="save-btn" onclick="saveQuery(1)">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
                 <div class="error"></div>
                 <div class="visual-controls" style="display:none;"></div>
                 <div class="result"></div>
             </div>
             <div class="query-container" id="query-2">
-                <textarea class="sql-query" placeholder="输入SQL查询语句...">SELECT ref_field as lable, count(*) as 'value' FROM pro_refs GROUP BY ref_field;</textarea>
-                <button onclick="executeQuery(2)"><i class="fas fa-play"></i> 执行查询</button>
+                <div class="sql-editor-container" id="sql-editor-2"></div>
+                <div class="query-actions">
+                    <button class="execute-btn" onclick="executeQuery(2)">
+                        <i class="fas fa-play"></i> 执行查询
+                    </button>
+                    <button class="save-btn" onclick="saveQuery(2)">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
                 <div class="error"></div>
                 <div class="visual-controls" style="display:none;"></div>
                 <div class="result"></div>
             </div>
             <div class="query-container" id="query-3">
-                <textarea class="sql-query" placeholder="输入SQL查询语句...">SELECT ref_field as lable, count(*) as 'value' FROM pro_refs GROUP BY ref_field;</textarea>
-                <button onclick="executeQuery(3)"><i class="fas fa-play"></i> 执行查询</button>
+                <div class="sql-editor-container" id="sql-editor-3"></div>
+                <div class="query-actions">
+                    <button class="execute-btn" onclick="executeQuery(3)">
+                        <i class="fas fa-play"></i> 执行查询
+                    </button>
+                    <button class="save-btn" onclick="saveQuery(3)">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
                 <div class="error"></div>
                 <div class="visual-controls" style="display:none;"></div>
                 <div class="result"></div>
@@ -144,14 +171,75 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
         </div>
         
         <!-- Excel导入区域 -->
-        <div id="excel-import" class="excel-import" style="margin-top: 30px; padding: 15px; border: 1px dashed #ccc; border-radius: 5px;">
-            <h3><i class="fas fa-file-excel"></i> Excel导入</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
-                <input type="file" id="excel-file" accept=".xlsx,.xls">
-                <button onclick="importExcel()"><i class="fas fa-upload"></i> 导入并执行</button>
-                <button onclick="downloadExcelTemplate()"><i class="fas fa-download"></i> 下载Excel模板</button>
+        <div id="excel-import" class="excel-import">
+            <h3><i class="fas fa-file-excel"></i> Excel数据导入</h3>
+            
+            <!-- 文件上传区域 -->
+            <div id="upload-area" class="upload-area">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">拖拽Excel文件到此处，或点击选择文件</div>
+                <div class="upload-hint">支持 .xlsx, .xls, .csv 格式，最大10MB</div>
+                <div class="file-input-wrapper">
+                    <input type="file" id="excel-file" accept=".xlsx,.xls,.csv">
+                    <div class="file-input-button">
+                        <i class="fas fa-folder-open"></i>
+                        <span>选择文件</span>
+                    </div>
+                </div>
             </div>
+            
+            <!-- 选中文件显示 -->
+            <div id="selected-file" class="selected-file">
+                <div class="file-info">
+                    <div class="file-details">
+                        <i class="fas fa-file-excel file-icon"></i>
+                        <div>
+                            <div id="file-name" class="file-name"></div>
+                            <div id="file-size" class="file-size"></div>
+                        </div>
+                    </div>
+                    <button id="remove-file-btn" class="remove-file">
+                        <i class="fas fa-times"></i> 移除
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 操作按钮 -->
+            <div class="excel-actions">
+                <button id="import-excel-btn" class="excel-btn" disabled>
+                    <i class="fas fa-upload"></i>
+                    <span>导入并执行</span>
+                </button>
+                <button id="preview-btn" class="excel-btn secondary">
+                    <i class="fas fa-eye"></i>
+                    <span>预览数据</span>
+                </button>
+                <button id="download-template-btn" class="excel-btn secondary">
+                    <i class="fas fa-download"></i>
+                    <span>下载模板</span>
+                </button>
+            </div>
+            
+            <!-- 导入状态 -->
             <div id="import-status"></div>
+            
+            <!-- 进度条 -->
+            <div id="progress-container" class="progress-container" style="display: none;">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            
+            <!-- 数据预览 -->
+            <div id="excel-preview" class="excel-preview">
+                <div class="preview-header">
+                    <div class="preview-title">
+                        <i class="fas fa-table"></i> 数据预览
+                    </div>
+                    <div id="preview-stats" class="preview-stats"></div>
+                </div>
+                <table id="preview-table" class="preview-table"></table>
+            </div>
         </div>
         
         <footer style="text-align: center; margin-top: 50px; color: #7f8c8d; font-size: 14px;">
@@ -161,6 +249,12 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <script src="/static/js/sql-intellisense.js"></script>
+    <script src="/static/js/sql-editor.js"></script>
+    <script src="/static/js/advanced-sql-editor.js"></script>
+    <script src="/static/js/editor-manager.js"></script>
+    <script src="/static/js/excel-import.js"></script>
     <script src="/static/js/data-analysis-rules.js"></script>
     <script src="/static/js/report-generator.js"></script>
     <script src="/static/js/fallback-analyzer.js"></script>

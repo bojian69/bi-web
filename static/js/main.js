@@ -3,6 +3,66 @@ let queryResults = {}; // 存储所有查询结果
 let queryCount = 3; // 当前查询数量
 let activeTab = 1; // 当前激活的标签页
 
+// 获取SQL查询内容（兼容高级编辑器和基础编辑器）
+function getSQLQuery(queryId) {
+    // 优先使用高级编辑器
+    if (window.advancedSQLEditors && window.advancedSQLEditors[queryId]) {
+        return getAdvancedQueryContent(queryId);
+    }
+    // 回退到基础编辑器
+    else if (window.getQueryContent) {
+        return getQueryContent(queryId);
+    }
+    // 最后的备用方案
+    else {
+        const textarea = document.querySelector(`#sql-textarea-${queryId}`);
+        return textarea ? textarea.value : '';
+    }
+}
+
+// 设置SQL查询内容（兼容高级编辑器和基础编辑器）
+function setSQLQuery(queryId, sql) {
+    // 优先使用高级编辑器
+    if (window.advancedSQLEditors && window.advancedSQLEditors[queryId]) {
+        setAdvancedQueryContent(queryId, sql);
+    }
+    // 回退到基础编辑器
+    else if (window.setQueryContent) {
+        setQueryContent(queryId, sql);
+    }
+    // 最后的备用方案
+    else {
+        const textarea = document.querySelector(`#sql-textarea-${queryId}`);
+        if (textarea) {
+            textarea.value = sql;
+        }
+    }
+}
+
+// 保存查询
+function saveQuery(queryId) {
+    const sql = getSQLQuery(queryId);
+    if (!sql.trim()) {
+        alert('查询内容为空，无法保存');
+        return;
+    }
+    
+    // 保存到本地存储
+    let savedQueries = JSON.parse(localStorage.getItem('savedQueries') || '[]');
+    const queryName = prompt('请输入查询名称:', `查询_${new Date().toLocaleString()}`);
+    
+    if (queryName) {
+        savedQueries.push({
+            name: queryName,
+            sql: sql,
+            timestamp: new Date().toISOString()
+        });
+        
+        localStorage.setItem('savedQueries', JSON.stringify(savedQueries));
+        alert('查询已保存！');
+    }
+}
+
 // 切换标签页
 function switchTab(tabId) {
     // 更新激活的标签
@@ -24,12 +84,11 @@ function switchTab(tabId) {
 // 执行查询
 async function executeQuery(queryId) {
     const container = document.getElementById(`query-${queryId}`);
-    const sqlTextarea = container.querySelector('.sql-query');
     const errorDiv = container.querySelector('.error');
     const resultDiv = container.querySelector('.result');
     const visualControls = container.querySelector('.visual-controls');
     
-    const query = sqlTextarea.value;
+    const query = getSQLQuery(queryId);
     
     errorDiv.innerHTML = '';
     resultDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> 查询中...</div>';
@@ -51,14 +110,24 @@ async function executeQuery(queryId) {
             return;
         }
         
+        // 显示查询统计信息
+        let statsHtml = '';
+        if (data.duration) {
+            statsHtml += `<div class="query-stats"><i class="fas fa-clock"></i> 执行耗时: <strong>${data.duration}</strong>`;
+            if (data.rowCount !== undefined) {
+                statsHtml += ` | <i class="fas fa-list"></i> 返回行数: <strong>${data.rowCount}</strong>`;
+            }
+            statsHtml += '</div>';
+        }
+        
         if (data.rows.length === 0) {
-            resultDiv.innerHTML = '<p><i class="fas fa-info-circle"></i> 查询成功，无数据返回</p>';
+            resultDiv.innerHTML = statsHtml + '<p><i class="fas fa-info-circle"></i> 查询成功，无数据返回</p>';
             return;
         }
         
         // 显示可视化控制按钮
         if (data.visualizationTypes && data.visualizationTypes.length > 0) {
-            let controlsHtml = '<div class="viz-buttons">';
+            let controlsHtml = statsHtml + '<div class="viz-buttons">';
             data.visualizationTypes.forEach(type => {
                 const active = type === 'table' ? 'active' : '';
                 const icon = getVisualTypeIcon(type);
@@ -67,6 +136,12 @@ async function executeQuery(queryId) {
             controlsHtml += '</div>';
             visualControls.innerHTML = controlsHtml;
             visualControls.style.display = 'block';
+        } else {
+            // 即使没有可视化选项，也显示统计信息
+            if (statsHtml) {
+                visualControls.innerHTML = statsHtml;
+                visualControls.style.display = 'block';
+            }
         }
         
         // 默认显示表格视图
@@ -81,11 +156,19 @@ async function executeQuery(queryId) {
 // 切换可视化类型
 function changeVisualization(queryId, type) {
     const container = document.getElementById(`query-${queryId}`);
-    const buttons = container.querySelectorAll('.visual-controls button');
+    if (!container) {
+        console.error(`找不到查询容器: query-${queryId}`);
+        return;
+    }
+    
+    const buttons = container.querySelectorAll('.viz-buttons button');
     
     buttons.forEach(btn => {
         btn.classList.remove('active');
-        if (btn.innerText.includes(getVisualTypeName(type))) {
+        // 使用更精确的匹配方式
+        const btnText = btn.textContent.trim();
+        const targetText = getVisualTypeName(type);
+        if (btnText.includes(targetText)) {
             btn.classList.add('active');
         }
     });
@@ -280,14 +363,31 @@ function addQuery() {
     queryContainer.id = `query-${queryCount}`;
     
     queryContainer.innerHTML = `
-        <textarea class="sql-query" placeholder="输入SQL查询语句...">SELECT ref_field as lable, count(*) as 'value' FROM pro_refs GROUP BY ref_field;</textarea>
-        <button onclick="executeQuery(${queryCount})"><i class="fas fa-play"></i> 执行查询</button>
+        <div class="sql-editor-container" id="sql-editor-${queryCount}"></div>
+        <div class="query-actions">
+            <button class="execute-btn" onclick="executeQuery(${queryCount})">
+                <i class="fas fa-play"></i> 执行查询
+            </button>
+            <button class="save-btn" onclick="saveQuery(${queryCount})">
+                <i class="fas fa-save"></i> 保存
+            </button>
+        </div>
         <div class="error"></div>
         <div class="visual-controls" style="display:none;"></div>
         <div class="result"></div>
     `;
     
     document.getElementById('queries-container').appendChild(queryContainer);
+    
+    // 初始化新的SQL编辑器
+    setTimeout(() => {
+        // 优先创建高级编辑器
+        if (window.createAdvancedSQLEditor) {
+            createAdvancedSQLEditor(queryCount);
+        } else {
+            createSQLEditor(queryCount);
+        }
+    }, 100);
     
     // 切换到新标签页
     switchTab(queryCount);
@@ -312,13 +412,19 @@ function removeQuery(queryId, event) {
         queryContainer.parentNode.removeChild(queryContainer);
     }
     
-    // 删除查询结果
+    // 删除查询结果和编辑器实例
     delete queryResults[queryId];
+    if (window.sqlEditors && window.sqlEditors[queryId]) {
+        delete window.sqlEditors[queryId];
+    }
     
     // 如果删除的是当前激活的标签，切换到第一个标签
     if (activeTab === queryId) {
-        const firstTabId = document.querySelector('.tab').getAttribute('data-tab');
-        switchTab(parseInt(firstTabId));
+        const firstTab = document.querySelector('.tab');
+        if (firstTab) {
+            const firstTabId = firstTab.getAttribute('data-tab');
+            switchTab(parseInt(firstTabId));
+        }
     }
 }
 
@@ -338,7 +444,29 @@ function compareQueries() {
         return;
     }
     
-    // 合并查询结果
+    // 调用后端API进行合并
+    fetch('/api/merge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ queries: validResults })
+    })
+    .then(response => response.json())
+    .then(mergedData => {
+        if (mergedData.error) {
+            alert('合并失败: ' + mergedData.error);
+            return;
+        }
+        
+        displayMergedResults(mergedData, validResults);
+    })
+    .catch(error => {
+        console.error('合并请求失败:', error);
+        alert('合并请求失败: ' + error.message);
+    });
+}
+
+// 显示合并结果
+function displayMergedResults(mergedData, originalResults) {
     const comparisonResult = document.getElementById('comparison-result');
     comparisonResult.innerHTML = '<h2><i class="fas fa-chart-line"></i> 查询结果合并展示</h2>';
     
@@ -354,25 +482,35 @@ function compareQueries() {
         });
     });
     
-    // 创建表格
-    let html = '<table><thead><tr><th>标签</th>';
+    // 创建表格，包含执行时间信息
+    let html = '<div class="comparison-stats"><h3>查询执行统计</h3><div class="stats-grid">';
     
-    // 添加每个查询的列标题
-    validResults.forEach((data, index) => {
-        html += `<th>${data.columns[1] || '查询 ' + (index + 1)}</th>`;
-    });
-    
-    html += '</tr></thead><tbody>';
-    
-    // 添加每行数据
-    Array.from(allLabels).sort().forEach(label => {
-        html += `<tr><td>${label}</td>`;
-        
-        validResults.forEach((data, dataIndex) => {
-            let value = '-';
+    // 使用后端返回的统计信息
+    if (mergedData.queryStats) {
+        mergedData.queryStats.forEach((stat, index) => {
+            const originalData = originalResults[index];
             let queryId = '';
+            for (const id in queryResults) {
+                if (queryResults[id] === originalData) {
+                    queryId = id;
+                    break;
+                }
+            }
             
-            // 查找对应的查询ID
+            html += `<div class="stat-card">`;
+            html += `<h4><i class="fas fa-database"></i> 查询 ${queryId}</h4>`;
+            if (stat.duration) {
+                html += `<p><i class="fas fa-clock"></i> 执行耗时: <strong>${stat.duration}</strong></p>`;
+            }
+            if (stat.rowCount !== undefined) {
+                html += `<p><i class="fas fa-list"></i> 返回行数: <strong>${stat.rowCount}</strong></p>`;
+            }
+            html += `</div>`;
+        });
+    } else {
+        // 备用方案：使用原始数据
+        originalResults.forEach((data, index) => {
+            let queryId = '';
             for (const id in queryResults) {
                 if (queryResults[id] === data) {
                     queryId = id;
@@ -380,20 +518,40 @@ function compareQueries() {
                 }
             }
             
-            data.rows.forEach(row => {
-                if (String(row[0]) === label && row.length > 1) {
-                    value = row[1];
-                }
-            });
-            
-            // 不再追加查询编号
-            html += `<td>${value}</td>`;
+            html += `<div class="stat-card">`;
+            html += `<h4><i class="fas fa-database"></i> 查询 ${queryId}</h4>`;
+            if (data.duration) {
+                html += `<p><i class="fas fa-clock"></i> 执行耗时: <strong>${data.duration}</strong></p>`;
+            }
+            if (data.rowCount !== undefined) {
+                html += `<p><i class="fas fa-list"></i> 返回行数: <strong>${data.rowCount}</strong></p>`;
+            }
+            html += `</div>`;
         });
-        
+    }
+    
+    html += '</div></div>';
+    
+    // 创建数据对比表格
+    html += '<div class="comparison-table"><h3>数据对比</h3><table><thead><tr><th>标签</th>';
+    
+    // 使用合并后的列名
+    for (let i = 1; i < mergedData.columns.length; i++) {
+        html += `<th>${mergedData.columns[i]}</th>`;
+    }
+    
+    html += '</tr></thead><tbody>';
+    
+    // 添加合并后的数据行
+    mergedData.rows.forEach(row => {
+        html += '<tr>';
+        row.forEach(cell => {
+            html += `<td>${cell || '-'}</td>`;
+        });
         html += '</tr>';
     });
     
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     comparisonResult.innerHTML += html;
     
     // 添加可视化选项
@@ -410,38 +568,30 @@ function compareQueries() {
     
     comparisonResult.appendChild(vizControls);
     
-    // 保存合并结果
+    // 保存合并结果用于图表显示
+    const labels = mergedData.rows.map(row => String(row[0]));
+    const datasets = [];
+    
+    for (let colIndex = 1; colIndex < mergedData.columns.length; colIndex++) {
+        const values = mergedData.rows.map(row => {
+            const value = row[colIndex];
+            if (value === null || value === undefined) return null;
+            const numValue = parseFloat(String(value).replace(/,/g, ''));
+            return isNaN(numValue) ? null : numValue;
+        });
+        
+        datasets.push({
+            label: mergedData.columns[colIndex],
+            data: values,
+            backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`,
+            borderColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
+            borderWidth: 1
+        });
+    }
+    
     window.mergedData = {
-        labels: Array.from(allLabels).sort(),
-        datasets: validResults.map((data, index) => {
-            const values = [];
-            Array.from(allLabels).sort().forEach(label => {
-                let value = 0;
-                let found = false;
-                
-                data.rows.forEach(row => {
-                    if (String(row[0]) === label && row.length > 1) {
-                        // 尝试将值转换为数字
-                        const numValue = parseFloat(String(row[1]).replace(/,/g, ''));
-                        if (!isNaN(numValue)) {
-                            value = numValue;
-                            found = true;
-                        }
-                    }
-                });
-                
-                // 如果没有找到匹配的值，使用null而不是0，这样在图表中会显示为空白
-                values.push(found ? value : null);
-            });
-            
-            return {
-                label: data.columns[1] || '查询 ' + (index + 1),
-                data: values,
-                backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`,
-                borderColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
-                borderWidth: 1
-            };
-        })
+        labels: labels,
+        datasets: datasets
     };
     
     // 滚动到结果区域
@@ -593,12 +743,11 @@ async function executeAllQueries() {
         try {
             // 执行查询
             await new Promise(resolve => {
-                const sqlTextarea = container.querySelector('.sql-query');
                 const errorDiv = container.querySelector('.error');
                 const resultDiv = container.querySelector('.result');
                 const visualControls = container.querySelector('.visual-controls');
                 
-                const query = sqlTextarea.value;
+                const query = getSQLQuery(queryId);
                 
                 errorDiv.innerHTML = '';
                 resultDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> 查询中...</div>';
@@ -618,12 +767,22 @@ async function executeAllQueries() {
                         resultDiv.innerHTML = '';
                         failCount++;
                     } else {
+                        // 显示查询统计信息
+                        let statsHtml = '';
+                        if (data.duration) {
+                            statsHtml += `<div class="query-stats"><i class="fas fa-clock"></i> 执行耗时: <strong>${data.duration}</strong>`;
+                            if (data.rowCount !== undefined) {
+                                statsHtml += ` | <i class="fas fa-list"></i> 返回行数: <strong>${data.rowCount}</strong>`;
+                            }
+                            statsHtml += '</div>';
+                        }
+                        
                         if (data.rows.length === 0) {
-                            resultDiv.innerHTML = '<p><i class="fas fa-info-circle"></i> 查询成功，无数据返回</p>';
+                            resultDiv.innerHTML = statsHtml + '<p><i class="fas fa-info-circle"></i> 查询成功，无数据返回</p>';
                         } else {
                             // 显示可视化控制按钮
                             if (data.visualizationTypes && data.visualizationTypes.length > 0) {
-                                let controlsHtml = '<div class="viz-buttons">';
+                                let controlsHtml = statsHtml + '<div class="viz-buttons">';
                                 data.visualizationTypes.forEach(type => {
                                     const active = type === 'table' ? 'active' : '';
                                     const icon = getVisualTypeIcon(type);
@@ -631,6 +790,9 @@ async function executeAllQueries() {
                                 });
                                 controlsHtml += '</div>';
                                 visualControls.innerHTML = controlsHtml;
+                                visualControls.style.display = 'block';
+                            } else if (statsHtml) {
+                                visualControls.innerHTML = statsHtml;
                                 visualControls.style.display = 'block';
                             }
                             
@@ -1052,6 +1214,9 @@ function importExcel() {
     const file = fileInput.files[0];
     statusDiv.innerHTML = '<p>正在处理Excel文件...</p>';
     
+    // 清除之前的导入数据
+    delete window.pendingImportData;
+    
     const reader = new FileReader();
     
     reader.onload = function(e) {
@@ -1066,81 +1231,28 @@ function importExcel() {
             // 将工作表转换为JSON
             const jsonData = XLSX.utils.sheet_to_json(worksheet);
             
-            // 提取SQL查询
-            const sqlQueries = [];
+            // 提取SQL查询 - 使用Set去重
+            const sqlSet = new Set();
             
             jsonData.forEach(row => {
-                // 尝试从每一行中找到SQL查询
                 Object.values(row).forEach(value => {
-                    if (typeof value === 'string' && 
-                        (value.trim().toUpperCase().startsWith('SELECT') || 
-                         value.trim().toUpperCase().startsWith('WITH'))) {
-                        sqlQueries.push(value.trim());
+                    if (typeof value === 'string') {
+                        const trimmedValue = value.trim();
+                        const upperValue = trimmedValue.toUpperCase();
+                        if ((upperValue.startsWith('SELECT') || upperValue.startsWith('WITH')) && 
+                            trimmedValue.length > 10) {
+                            sqlSet.add(trimmedValue);
+                        }
                     }
                 });
             });
             
-            if (sqlQueries.length === 0) {
-                statusDiv.innerHTML = '<p style="color: red;">未在Excel文件中找到SQL查询</p>';
-                return;
-            }
+            const sqlQueries = Array.from(sqlSet);
             
-            statusDiv.innerHTML = `<p style="color: green;">成功提取 ${sqlQueries.length} 个SQL查询</p>`;
+            // 显示预览
+            showExcelPreview(jsonData, sqlQueries);
             
-            // 清除现有查询
-            document.querySelectorAll('.tab:not(.new-tab)').forEach(tab => {
-                tab.parentNode.removeChild(tab);
-            });
-            
-            document.querySelectorAll('.query-container').forEach(container => {
-                container.parentNode.removeChild(container);
-            });
-            
-            queryResults = {};
-            queryCount = 0;
-            activeTab = 1; // 重置激活标签页
-            
-            // 添加从Excel中提取的查询
-            sqlQueries.forEach((sql, index) => {
-                queryCount++;
-                
-                // 创建新标签
-                const tabsContainer = document.getElementById('query-tabs');
-                const newTabButton = tabsContainer.querySelector('.new-tab');
-                
-                const tabElement = document.createElement('div');
-                tabElement.className = 'tab';
-                tabElement.setAttribute('data-tab', queryCount);
-                tabElement.innerHTML = `
-                    <i class="fas fa-database"></i> 查询 ${queryCount}
-                    <span class="close-tab" onclick="removeQuery(${queryCount}, event)"><i class="fas fa-times"></i></span>
-                `;
-                tabElement.onclick = () => switchTab(queryCount);
-                
-                // 插入新标签到"新查询"按钮前面
-                tabsContainer.insertBefore(tabElement, newTabButton);
-                
-                // 创建新查询容器
-                const queryContainer = document.createElement('div');
-                queryContainer.className = 'query-container';
-                queryContainer.id = `query-${queryCount}`;
-                
-                queryContainer.innerHTML = `
-                    <textarea class="sql-query" placeholder="输入SQL查询语句...">${sql}</textarea>
-                    <button onclick="executeQuery(${queryCount})"><i class="fas fa-play"></i> 执行查询</button>
-                    <div class="error"></div>
-                    <div class="visual-controls" style="display:none;"></div>
-                    <div class="result"></div>
-                `;
-                
-                document.getElementById('queries-container').appendChild(queryContainer);
-                
-                // 如果是第一个查询，自动执行
-                if (index === 0) {
-                    switchTab(queryCount);
-                    setTimeout(() => executeQuery(queryCount), 500);
-                }
-            });
+
             
         } catch (error) {
             statusDiv.innerHTML = `<p style="color: red;">Excel文件解析失败: ${error.message}</p>`;
@@ -1152,6 +1264,154 @@ function importExcel() {
     };
     
     reader.readAsArrayBuffer(file);
+}
+
+// 显示Excel预览
+function showExcelPreview(jsonData, sqlQueries) {
+    const statusDiv = document.getElementById('import-status');
+    
+    if (sqlQueries.length === 0) {
+        statusDiv.innerHTML = '<p style="color: red;">未在Excel文件中找到SQL查询</p>';
+        return;
+    }
+    
+    let html = `
+        <div class="preview-stats">
+            <i class="fas fa-info-circle"></i> 
+            找到 <strong>${sqlQueries.length}</strong> 个SQL查询，共 <strong>${jsonData.length}</strong> 行数据
+        </div>
+        <div class="excel-preview">
+            <table>
+                <thead>
+                    <tr>
+    `;
+    
+    // 表头
+    if (jsonData.length > 0) {
+        Object.keys(jsonData[0]).forEach(key => {
+            html += `<th>${key}</th>`;
+        });
+    }
+    html += '</tr></thead><tbody>';
+    
+    // 表体 - 只显示前10行
+    jsonData.slice(0, 10).forEach(row => {
+        html += '<tr>';
+        Object.values(row).forEach(value => {
+            const cellValue = String(value || '');
+            const isSQL = cellValue.trim().toUpperCase().startsWith('SELECT') || 
+                         cellValue.trim().toUpperCase().startsWith('WITH');
+            const cellClass = isSQL ? 'sql-cell' : '';
+            const displayValue = cellValue.length > 50 ? cellValue.substring(0, 50) + '...' : cellValue;
+            html += `<td class="${cellClass}" title="${cellValue}">${displayValue}</td>`;
+        });
+        html += '</tr>';
+    });
+    
+    html += `
+            </tbody>
+        </table>
+        </div>
+        <div class="import-actions">
+            <button class="import-confirm" onclick="confirmImport()">
+                <i class="fas fa-check"></i> 确认导入并执行
+            </button>
+            <button class="import-cancel" onclick="cancelImport()">
+                <i class="fas fa-times"></i> 取消
+            </button>
+        </div>
+    `;
+    
+    statusDiv.innerHTML = html;
+    window.pendingImportData = { jsonData, sqlQueries };
+}
+
+// 确认导入
+function confirmImport() {
+    if (!window.pendingImportData) return;
+    
+    const { sqlQueries } = window.pendingImportData;
+    const statusDiv = document.getElementById('import-status');
+    
+    statusDiv.innerHTML = `<p style="color: green;">正在导入 ${sqlQueries.length} 个SQL查询...</p>`;
+    
+    // 清除现有查询
+    document.querySelectorAll('.tab:not(.new-tab)').forEach(tab => {
+        tab.parentNode.removeChild(tab);
+    });
+    
+    document.querySelectorAll('.query-container').forEach(container => {
+        container.parentNode.removeChild(container);
+    });
+    
+    queryResults = {};
+    queryCount = 0;
+    activeTab = 1;
+    
+    // 添加SQL查询
+    sqlQueries.forEach((sql, index) => {
+        queryCount++;
+        
+        const tabsContainer = document.getElementById('query-tabs');
+        const newTabButton = tabsContainer.querySelector('.new-tab');
+        
+        const tabElement = document.createElement('div');
+        tabElement.className = 'tab';
+        tabElement.setAttribute('data-tab', queryCount);
+        tabElement.innerHTML = `
+            <i class="fas fa-database"></i> 查询 ${queryCount}
+            <span class="close-tab" onclick="removeQuery(${queryCount}, event)"><i class="fas fa-times"></i></span>
+        `;
+        tabElement.onclick = () => switchTab(queryCount);
+        
+        tabsContainer.insertBefore(tabElement, newTabButton);
+        
+        const queryContainer = document.createElement('div');
+        queryContainer.className = 'query-container';
+        queryContainer.id = `query-${queryCount}`;
+        
+        queryContainer.innerHTML = `
+            <div class="sql-editor-container" id="sql-editor-${queryCount}"></div>
+            <div class="query-actions">
+                <button class="execute-btn" onclick="executeQuery(${queryCount})">
+                    <i class="fas fa-play"></i> 执行查询
+                </button>
+                <button class="save-btn" onclick="saveQuery(${queryCount})">
+                    <i class="fas fa-save"></i> 保存
+                </button>
+            </div>
+            <div class="error"></div>
+            <div class="visual-controls" style="display:none;"></div>
+            <div class="result"></div>
+        `;
+        
+        document.getElementById('queries-container').appendChild(queryContainer);
+        
+        setTimeout(() => {
+            // 优先创建高级编辑器
+            if (window.createAdvancedSQLEditor) {
+                createAdvancedSQLEditor(queryCount);
+                setTimeout(() => setSQLQuery(queryCount, sql), 200);
+            } else {
+                createSQLEditor(queryCount);
+                setTimeout(() => setSQLQuery(queryCount, sql), 200);
+            }
+        }, 100);
+        
+        if (index === 0) {
+            switchTab(queryCount);
+        }
+    });
+    
+    statusDiv.innerHTML = `<p style="color: green;">成功导入 ${sqlQueries.length} 个SQL查询！</p>`;
+    delete window.pendingImportData;
+}
+
+// 取消导入
+function cancelImport() {
+    const statusDiv = document.getElementById('import-status');
+    statusDiv.innerHTML = '';
+    delete window.pendingImportData;
 }
 
 // 下载Excel模板
@@ -1185,3 +1445,19 @@ function downloadExcelTemplate() {
     // 生成Excel文件并下载
     XLSX.writeFile(wb, "SQL查询模板.xlsx");
 }
+
+// 初始化文件选择事件监听器
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('excel-file');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files.length > 0) {
+                // 重置文件输入状态
+                this.blur();
+                setTimeout(() => {
+                    importExcel();
+                }, 100);
+            }
+        });
+    }
+});

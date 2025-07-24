@@ -486,8 +486,8 @@ Content-Type: application/json
 
 ## 📞 联系方式
 
-- 项目链接: [GitHub Repository](https://github.com/your-username/bi-web)
-- 问题反馈: [Issues](https://github.com/your-username/bi-web/issues)
+- 项目链接: [GitHub Repository](https://github.com/bojian69/bi-web)
+- 问题反馈: [Issues](https://github.com/bojian69/bi-web/issues)
 
 ---
 

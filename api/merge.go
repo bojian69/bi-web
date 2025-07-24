@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"bi-web/db"
 )
 
 // MergeRequest 合并查询请求结构
 type MergeRequest struct {
-	Queries []map[string]interface{} `json:"queries"`
+	Queries []db.QueryResult `json:"queries"`
 }
 
 // MergeHandler 处理合并查询请求
@@ -35,7 +37,7 @@ func MergeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // 合并查询结果
-func mergeResults(queries []map[string]interface{}) map[string]interface{} {
+func mergeResults(queries []db.QueryResult) map[string]interface{} {
 	if len(queries) == 0 {
 		return map[string]interface{}{
 			"error": "没有可合并的查询结果",
@@ -45,14 +47,12 @@ func mergeResults(queries []map[string]interface{}) map[string]interface{} {
 	// 收集所有标签（第一列）
 	allLabels := make(map[string]bool)
 	for _, query := range queries {
-		rows, ok := query["rows"].([]interface{})
-		if !ok || len(rows) == 0 {
+		if len(query.Rows) == 0 {
 			continue
 		}
 		
-		for _, rowInterface := range rows {
-			row, ok := rowInterface.([]interface{})
-			if !ok || len(row) == 0 {
+		for _, row := range query.Rows {
+			if len(row) == 0 {
 				continue
 			}
 			
@@ -63,13 +63,24 @@ func mergeResults(queries []map[string]interface{}) map[string]interface{} {
 
 	// 准备合并结果
 	mergedColumns := []string{"标签"}
+	var queryStats []map[string]interface{}
+	
 	for i, query := range queries {
-		columns, ok := query["columns"].([]interface{})
-		if ok && len(columns) > 1 {
-			mergedColumns = append(mergedColumns, fmt.Sprintf("%v", columns[1]))
+		if len(query.Columns) > 1 {
+			mergedColumns = append(mergedColumns, query.Columns[1])
 		} else {
 			mergedColumns = append(mergedColumns, fmt.Sprintf("查询 %d", i+1))
 		}
+		
+		// 收集查询统计信息
+		stat := map[string]interface{}{
+			"queryIndex": i + 1,
+			"rowCount":   query.RowCount,
+		}
+		if query.Duration != "" {
+			stat["duration"] = query.Duration
+		}
+		queryStats = append(queryStats, stat)
 	}
 
 	// 构建合并行数据
@@ -78,7 +89,7 @@ func mergeResults(queries []map[string]interface{}) map[string]interface{} {
 		row := []interface{}{label}
 		
 		for _, query := range queries {
-			value := findValueForLabel(query, label)
+			value := findValueForLabelInQuery(query, label)
 			row = append(row, value)
 		}
 		
@@ -90,19 +101,14 @@ func mergeResults(queries []map[string]interface{}) map[string]interface{} {
 		"rows":               mergedRows,
 		"visualizationTypes": []string{"table", "bar", "line"},
 		"merged":             true,
+		"queryStats":         queryStats,
 	}
 }
 
 // 查找标签对应的值
-func findValueForLabel(query map[string]interface{}, label string) interface{} {
-	rows, ok := query["rows"].([]interface{})
-	if !ok {
-		return nil
-	}
-	
-	for _, rowInterface := range rows {
-		row, ok := rowInterface.([]interface{})
-		if !ok || len(row) == 0 {
+func findValueForLabelInQuery(query db.QueryResult, label string) interface{} {
+	for _, row := range query.Rows {
+		if len(row) == 0 {
 			continue
 		}
 		
