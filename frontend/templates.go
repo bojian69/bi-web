@@ -15,6 +15,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/sql-editor.css">
+    <link rel="stylesheet" href="/static/css/simple-advanced-editor.css">
     <link rel="stylesheet" href="/static/css/advanced-sql-editor.css">
     <link rel="stylesheet" href="/static/css/editor-manager.css">
     <link rel="stylesheet" href="/static/css/query-actions.css">
@@ -61,17 +62,8 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
         <!-- 标签页导航 -->
         <div class="tabs" id="query-tabs">
             <div class="tab active" data-tab="1" onclick="switchTab(1)">
-                <i class="fas fa-database"></i> 查询 1
+                <i class="fas fa-database"></i> SQL查询
             </div>
-            <div class="tab" data-tab="2" onclick="switchTab(2)">
-                <i class="fas fa-database"></i> 查询 2
-            </div>
-            <div class="tab" data-tab="3" onclick="switchTab(3)">
-                <i class="fas fa-database"></i> 查询 3
-            </div>
-            <button class="new-tab" onclick="addQuery()">
-                <i class="fas fa-plus"></i> 新查询
-            </button>
         </div>
         
         <!-- 查询容器 -->
@@ -252,6 +244,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
     <script src="/static/js/sql-intellisense.js"></script>
     <script src="/static/js/sql-editor.js"></script>
+    <script src="/static/js/simple-advanced-editor.js"></script>
     <script src="/static/js/advanced-sql-editor.js"></script>
     <script src="/static/js/editor-manager.js"></script>
     <script src="/static/js/excel-import.js"></script>

@@ -5,19 +5,47 @@ let activeTab = 1; // 当前激活的标签页
 
 // 获取SQL查询内容（兼容高级编辑器和基础编辑器）
 function getSQLQuery(queryId) {
-    // 优先使用高级编辑器
+    // 尝试编辑器管理器
+    if (window.editorManager) {
+        const content = window.editorManager.getEditorContent(queryId);
+        if (content && content.trim()) return content;
+    }
+    
+    // 尝试简化版高级编辑器
+    if (window.simpleAdvancedEditors && window.simpleAdvancedEditors[queryId]) {
+        const content = window.simpleAdvancedEditors[queryId].getValue();
+        if (content && content.trim()) return content;
+    }
+    
+    // 尝试高级编辑器
     if (window.advancedSQLEditors && window.advancedSQLEditors[queryId]) {
-        return getAdvancedQueryContent(queryId);
+        const content = window.advancedSQLEditors[queryId].getValue();
+        if (content && content.trim()) return content;
     }
-    // 回退到基础编辑器
-    else if (window.getQueryContent) {
-        return getQueryContent(queryId);
+    
+    // 尝试基础编辑器
+    if (window.sqlEditors && window.sqlEditors[queryId]) {
+        const content = window.sqlEditors[queryId].getValue();
+        if (content && content.trim()) return content;
     }
-    // 最后的备用方案
-    else {
-        const textarea = document.querySelector(`#sql-textarea-${queryId}`);
-        return textarea ? textarea.value : '';
+    
+    // 直接查找textarea
+    const textarea = document.querySelector(`#sql-textarea-${queryId}`);
+    if (textarea && textarea.value && textarea.value.trim()) {
+        return textarea.value;
     }
+    
+    // 查找Monaco编辑器容器中的内容
+    const monacoContainer = document.querySelector(`#monaco-sql-editor-${queryId}`);
+    if (monacoContainer && window.monaco) {
+        const models = window.monaco.editor.getModels();
+        for (const model of models) {
+            const content = model.getValue();
+            if (content && content.trim()) return content;
+        }
+    }
+    
+    return '';
 }
 
 // 设置SQL查询内容（兼容高级编辑器和基础编辑器）
@@ -89,6 +117,15 @@ async function executeQuery(queryId) {
     const visualControls = container.querySelector('.visual-controls');
     
     const query = getSQLQuery(queryId);
+    
+    // 调试信息
+    console.log(`执行查询 ${queryId}, SQL内容:`, query);
+    
+    if (!query || !query.trim()) {
+        errorDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> SQL查询内容为空，请输入SQL语句';
+        resultDiv.innerHTML = '';
+        return;
+    }
     
     errorDiv.innerHTML = '';
     resultDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> 查询中...</div>';

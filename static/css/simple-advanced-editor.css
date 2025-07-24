@@ -1,0 +1,65 @@
+/* 简化版高级编辑器样式 */
+.simple-advanced-editor {
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.editor-toolbar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.editor-toolbar button {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.editor-toolbar button:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+.editor-status {
+    margin-left: auto;
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.monaco-container {
+    position: relative;
+}
+
+/* 确保Monaco编辑器正确显示 */
+.monaco-container .monaco-editor {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .editor-toolbar {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .editor-toolbar button {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+}

@@ -33,15 +33,22 @@ class AdvancedSQLEditor {
     
     async init() {
         try {
+            // 显示加载状态
+            this.showLoadingState();
+            
             // 检查Monaco Editor是否已加载
             if (typeof monaco === 'undefined') {
                 await this.loadMonacoEditor();
             }
             
+            // 等待一小段时间确保Monaco完全初始化
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             this.createEditor();
             this.setupSQLLanguage();
             this.setupEventListeners();
             this.loadSavedQuery();
+            
         } catch (error) {
             console.error('高级SQL编辑器初始化失败，回退到基础编辑器:', error);
             this.fallbackToBasicEditor();
@@ -50,19 +57,27 @@ class AdvancedSQLEditor {
     
     async loadMonacoEditor() {
         return new Promise((resolve, reject) => {
+            // 检查是否已经有loader脚本
+            if (window.require && window.require.config) {
+                require(['vs/editor/editor.main'], () => {
+                    resolve();
+                }, reject);
+                return;
+            }
+            
             // 创建Monaco Editor加载器
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js';
             script.onload = () => {
-                require.config({ 
+                window.require.config({ 
                     paths: { 
                         'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' 
                     } 
                 });
                 
-                require(['vs/editor/editor.main'], () => {
+                window.require(['vs/editor/editor.main'], () => {
                     resolve();
-                });
+                }, reject);
             };
             script.onerror = reject;
             document.head.appendChild(script);
@@ -70,6 +85,10 @@ class AdvancedSQLEditor {
     }
     
     createEditor() {
+        if (!window.monaco) {
+            throw new Error('Monaco Editor未加载');
+        }
+        
         // 清空容器并创建编辑器容器
         this.container.innerHTML = `
             <div class="advanced-sql-editor">
@@ -113,8 +132,13 @@ class AdvancedSQLEditor {
         const editorContainer = document.getElementById(`monaco-${this.containerId}`);
         const defaultSQL = this.getDefaultSQL();
         
+        // 确保容器有尺寸
+        if (editorContainer.offsetHeight === 0) {
+            editorContainer.style.height = '300px';
+        }
+        
         // 创建Monaco编辑器
-        this.editor = monaco.editor.create(editorContainer, {
+        this.editor = window.monaco.editor.create(editorContainer, {
             value: defaultSQL,
             language: 'sql',
             theme: this.options.theme,
@@ -527,11 +551,30 @@ GROUP BY ref_field;`;
         }
     }
     
+    showLoadingState() {
+        this.container.innerHTML = `
+            <div class="editor-loading-overlay">
+                <i class="fas fa-spinner fa-spin"></i>
+                正在加载高级编辑器...
+            </div>
+        `;
+    }
+    
     fallbackToBasicEditor() {
         // 如果Monaco Editor加载失败，回退到基础编辑器
         console.log('回退到基础SQL编辑器');
+        this.container.innerHTML = '';
         if (window.SQLEditor) {
             new SQLEditor(this.containerId, this.options);
+        } else {
+            // 最基础的回退方案
+            this.container.innerHTML = `
+                <div class="editor-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="error-message">编辑器加载失败</div>
+                    <button class="retry-btn" onclick="location.reload()">重新加载</button>
+                </div>
+            `;
         }
     }
     
@@ -582,19 +625,32 @@ const advancedSQLEditors = {};
 
 // 初始化高级SQL编辑器
 async function initAdvancedSQLEditors() {
+    // 串行初始化，避免并发问题
     for (let i = 1; i <= 3; i++) {
         const container = document.getElementById(`sql-editor-${i}`);
         if (container) {
-            advancedSQLEditors[i] = new AdvancedSQLEditor(`sql-editor-${i}`);
+            try {
+                advancedSQLEditors[i] = new AdvancedSQLEditor(`sql-editor-${i}`);
+                // 等待编辑器初始化完成
+                await new Promise(resolve => setTimeout(resolve, 200));
+            } catch (error) {
+                console.error(`初始化高级编辑器 ${i} 失败:`, error);
+            }
         }
     }
 }
 
 // 为新查询创建高级编辑器
-function createAdvancedSQLEditor(queryId) {
+async function createAdvancedSQLEditor(queryId) {
     const container = document.getElementById(`sql-editor-${queryId}`);
     if (container) {
-        advancedSQLEditors[queryId] = new AdvancedSQLEditor(`sql-editor-${queryId}`);
+        try {
+            advancedSQLEditors[queryId] = new AdvancedSQLEditor(`sql-editor-${queryId}`);
+            // 等待编辑器初始化完成
+            await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (error) {
+            console.error(`创建高级编辑器 ${queryId} 失败:`, error);
+        }
     }
 }
 
@@ -612,13 +668,27 @@ function setAdvancedQueryContent(queryId, content) {
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
-    // 检测是否支持Monaco Editor
-    const useAdvancedEditor = !window.location.search.includes('basic=1');
+    // 默认使用基础编辑器
+    const useAdvancedEditor = window.location.search.includes('advanced=1');
     
     if (useAdvancedEditor) {
-        setTimeout(initAdvancedSQLEditors, 200);
+        // 等待页面完全加载后再初始化高级编辑器
+        setTimeout(async () => {
+            try {
+                await initAdvancedSQLEditors();
+            } catch (error) {
+                console.error('高级编辑器初始化失败，回退到基础编辑器:', error);
+                if (window.initSQLEditors) {
+                    initSQLEditors();
+                }
+            }
+        }, 500);
     } else {
         // 使用基础编辑器
-        setTimeout(initSQLEditors, 100);
+        setTimeout(() => {
+            if (window.initSQLEditors) {
+                initSQLEditors();
+            }
+        }, 100);
     }
 });

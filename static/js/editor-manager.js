@@ -18,8 +18,8 @@ class EditorManager {
     getPreferredEditorType() {
         // 检查URL参数
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('editor') === 'basic') {
-            return 'basic';
+        if (urlParams.get('editor') === 'advanced') {
+            return 'advanced';
         }
         
         // 检查本地存储
@@ -28,11 +28,7 @@ class EditorManager {
             return saved;
         }
         
-        // 检查浏览器兼容性
-        if (this.isAdvancedEditorSupported()) {
-            return 'advanced';
-        }
-        
+        // 默认使用基础编辑器
         return 'basic';
     }
     
@@ -111,6 +107,7 @@ class EditorManager {
     async initializeAllEditors() {
         const containers = document.querySelectorAll('[id^="sql-editor-"]');
         
+        // 串行初始化编辑器，避免并发问题
         for (const container of containers) {
             const queryId = container.id.replace('sql-editor-', '');
             await this.createEditor(queryId);
@@ -123,17 +120,29 @@ class EditorManager {
         
         try {
             if (this.currentEditorType === 'advanced') {
-                // 创建高级编辑器
-                this.editors[queryId] = new AdvancedSQLEditor(`sql-editor-${queryId}`);
+                // 优先使用简化版高级编辑器
+                if (window.SimpleAdvancedSQLEditor) {
+                    this.editors[queryId] = new SimpleAdvancedSQLEditor(`sql-editor-${queryId}`);
+                } else {
+                    // 回退到完整版高级编辑器
+                    this.editors[queryId] = new AdvancedSQLEditor(`sql-editor-${queryId}`);
+                }
+                // 等待编辑器初始化完成
+                await new Promise(resolve => setTimeout(resolve, 300));
             } else {
                 // 创建基础编辑器
                 this.editors[queryId] = new SQLEditor(`sql-editor-${queryId}`);
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
         } catch (error) {
             console.error(`创建编辑器失败 (queryId: ${queryId}):`, error);
             // 回退到基础编辑器
             if (this.currentEditorType === 'advanced') {
-                this.editors[queryId] = new SQLEditor(`sql-editor-${queryId}`);
+                try {
+                    this.editors[queryId] = new SQLEditor(`sql-editor-${queryId}`);
+                } catch (fallbackError) {
+                    console.error('基础编辑器也创建失败:', fallbackError);
+                }
             }
         }
     }

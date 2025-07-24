@@ -77,6 +77,13 @@
     max-height: 600px;
     resize: vertical;
     overflow: hidden;
+    position: relative;
+}
+
+/* 确保编辑器容器有正确的尺寸 */
+.monaco-editor-container > .monaco-editor {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 /* 状态栏 */
@@ -88,7 +95,7 @@
     background: #f8f9fa;
     border-top: 1px solid #e9ecef;
     font-size: 11px;
-    color: #6c757d;
+    color: #ffffff;
 }
 
 .status-info,
@@ -219,7 +226,7 @@
     justify-content: center;
     height: 300px;
     background: #f8f9fa;
-    color: #6c757d;
+    color: #ffffff;
     font-size: 14px;
 }
 
@@ -423,7 +430,7 @@
     display: flex;
     gap: 12px;
     font-size: 11px;
-    color: #6c757d;
+    color: #ffffff;
     margin-left: 15px;
 }
 
