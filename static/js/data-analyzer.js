@@ -694,6 +694,8 @@ window.DataAnalyzer = {
             html += '<p>没有发现显著洞察</p>';
         }
         
+        }
+        
         if (selectedDimensions.includes('insights')) {
             html += `
                 </div>

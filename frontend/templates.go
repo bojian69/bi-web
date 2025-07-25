@@ -15,8 +15,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/sql-editor.css">
-    <link rel="stylesheet" href="/static/css/advanced-sql-editor.css">
-    <link rel="stylesheet" href="/static/css/editor-manager.css">
+
     <link rel="stylesheet" href="/static/css/query-actions.css">
     <link rel="stylesheet" href="/static/css/excel-import.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -62,12 +61,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
         <div class="tabs" id="query-tabs">
             <div class="tab active" data-tab="1" onclick="switchTab(1)">
                 <i class="fas fa-database"></i> 查询 1
-            </div>
-            <div class="tab" data-tab="2" onclick="switchTab(2)">
-                <i class="fas fa-database"></i> 查询 2
-            </div>
-            <div class="tab" data-tab="3" onclick="switchTab(3)">
-                <i class="fas fa-database"></i> 查询 3
+                <span class="close-tab" onclick="removeQuery(1, event)"><i class="fas fa-times"></i></span>
             </div>
             <button class="new-tab" onclick="addQuery()">
                 <i class="fas fa-plus"></i> 新查询
@@ -83,34 +77,6 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
                         <i class="fas fa-play"></i> 执行查询
                     </button>
                     <button class="save-btn" onclick="saveQuery(1)">
-                        <i class="fas fa-save"></i> 保存
-                    </button>
-                </div>
-                <div class="error"></div>
-                <div class="visual-controls" style="display:none;"></div>
-                <div class="result"></div>
-            </div>
-            <div class="query-container" id="query-2">
-                <div class="sql-editor-container" id="sql-editor-2"></div>
-                <div class="query-actions">
-                    <button class="execute-btn" onclick="executeQuery(2)">
-                        <i class="fas fa-play"></i> 执行查询
-                    </button>
-                    <button class="save-btn" onclick="saveQuery(2)">
-                        <i class="fas fa-save"></i> 保存
-                    </button>
-                </div>
-                <div class="error"></div>
-                <div class="visual-controls" style="display:none;"></div>
-                <div class="result"></div>
-            </div>
-            <div class="query-container" id="query-3">
-                <div class="sql-editor-container" id="sql-editor-3"></div>
-                <div class="query-actions">
-                    <button class="execute-btn" onclick="executeQuery(3)">
-                        <i class="fas fa-play"></i> 执行查询
-                    </button>
-                    <button class="save-btn" onclick="saveQuery(3)">
                         <i class="fas fa-save"></i> 保存
                     </button>
                 </div>
@@ -250,10 +216,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-    <script src="/static/js/sql-intellisense.js"></script>
     <script src="/static/js/sql-editor.js"></script>
-    <script src="/static/js/advanced-sql-editor.js"></script>
-    <script src="/static/js/editor-manager.js"></script>
     <script src="/static/js/excel-import.js"></script>
     <script src="/static/js/data-analysis-rules.js"></script>
     <script src="/static/js/report-generator.js"></script>

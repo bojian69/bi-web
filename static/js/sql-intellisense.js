@@ -288,8 +288,8 @@ class SQLIntelliSense {
         }
         
         // 检查未闭合的括号
-        const openParens = (line.match(/\\(/g) || []).length;
-        const closeParens = (line.match(/\\)/g) || []).length;
+        const openParens = (line.match(/\(/g) || []).length;
+        const closeParens = (line.match(/\)/g) || []).length;
         
         if (openParens !== closeParens) {
             errors.push({

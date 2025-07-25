@@ -1,37 +1,22 @@
 // 全局变量
 let queryResults = {}; // 存储所有查询结果
-let queryCount = 3; // 当前查询数量
+let queryCount = 1; // 当前查询数量
 let activeTab = 1; // 当前激活的标签页
 
-// 获取SQL查询内容（兼容高级编辑器和基础编辑器）
+// 获取SQL查询内容
 function getSQLQuery(queryId) {
-    // 优先使用高级编辑器
-    if (window.advancedSQLEditors && window.advancedSQLEditors[queryId]) {
-        return getAdvancedQueryContent(queryId);
-    }
-    // 回退到基础编辑器
-    else if (window.getQueryContent) {
+    if (window.getQueryContent) {
         return getQueryContent(queryId);
     }
-    // 最后的备用方案
-    else {
-        const textarea = document.querySelector(`#sql-textarea-${queryId}`);
-        return textarea ? textarea.value : '';
-    }
+    const textarea = document.querySelector(`#sql-textarea-${queryId}`);
+    return textarea ? textarea.value : '';
 }
 
-// 设置SQL查询内容（兼容高级编辑器和基础编辑器）
+// 设置SQL查询内容
 function setSQLQuery(queryId, sql) {
-    // 优先使用高级编辑器
-    if (window.advancedSQLEditors && window.advancedSQLEditors[queryId]) {
-        setAdvancedQueryContent(queryId, sql);
-    }
-    // 回退到基础编辑器
-    else if (window.setQueryContent) {
+    if (window.setQueryContent) {
         setQueryContent(queryId, sql);
-    }
-    // 最后的备用方案
-    else {
+    } else {
         const textarea = document.querySelector(`#sql-textarea-${queryId}`);
         if (textarea) {
             textarea.value = sql;
@@ -381,12 +366,7 @@ function addQuery() {
     
     // 初始化新的SQL编辑器
     setTimeout(() => {
-        // 优先创建高级编辑器
-        if (window.createAdvancedSQLEditor) {
-            createAdvancedSQLEditor(queryCount);
-        } else {
-            createSQLEditor(queryCount);
-        }
+        createSQLEditor(queryCount);
     }, 100);
     
     // 切换到新标签页
@@ -400,29 +380,43 @@ function removeQuery(queryId, event) {
         event.stopPropagation();
     }
     
+    // 确保至少保留一个查询
+    const allTabs = document.querySelectorAll('.tab:not(.new-tab)');
+    if (allTabs.length <= 1) {
+        alert('至少需要保留一个查询');
+        return;
+    }
+    
     // 删除标签
     const tabElement = document.querySelector(`.tab[data-tab="${queryId}"]`);
     if (tabElement) {
-        tabElement.parentNode.removeChild(tabElement);
+        tabElement.remove();
     }
     
     // 删除查询容器
     const queryContainer = document.getElementById(`query-${queryId}`);
     if (queryContainer) {
-        queryContainer.parentNode.removeChild(queryContainer);
+        queryContainer.remove();
     }
     
     // 删除查询结果和编辑器实例
     delete queryResults[queryId];
+    
+    // 清理编辑器实例
     if (window.sqlEditors && window.sqlEditors[queryId]) {
+        if (window.sqlEditors[queryId].dispose) {
+            window.sqlEditors[queryId].dispose();
+        }
         delete window.sqlEditors[queryId];
     }
     
-    // 如果删除的是当前激活的标签，切换到第一个标签
-    if (activeTab === queryId) {
-        const firstTab = document.querySelector('.tab');
-        if (firstTab) {
-            const firstTabId = firstTab.getAttribute('data-tab');
+
+    
+    // 如果删除的是当前激活的标签，切换到第一个可用标签
+    if (activeTab == queryId) {
+        const remainingTabs = document.querySelectorAll('.tab:not(.new-tab)');
+        if (remainingTabs.length > 0) {
+            const firstTabId = remainingTabs[0].getAttribute('data-tab');
             switchTab(parseInt(firstTabId));
         }
     }
@@ -474,7 +468,7 @@ function displayMergedResults(mergedData, originalResults) {
     const allLabels = new Set();
     
     // 收集所有标签
-    validResults.forEach(data => {
+    originalResults.forEach(data => {
         data.rows.forEach(row => {
             if (row.length > 0) {
                 allLabels.add(String(row[0]));
@@ -1388,14 +1382,8 @@ function confirmImport() {
         document.getElementById('queries-container').appendChild(queryContainer);
         
         setTimeout(() => {
-            // 优先创建高级编辑器
-            if (window.createAdvancedSQLEditor) {
-                createAdvancedSQLEditor(queryCount);
-                setTimeout(() => setSQLQuery(queryCount, sql), 200);
-            } else {
-                createSQLEditor(queryCount);
-                setTimeout(() => setSQLQuery(queryCount, sql), 200);
-            }
+            createSQLEditor(queryCount);
+            setTimeout(() => setSQLQuery(queryCount, sql), 200);
         }, 100);
         
         if (index === 0) {

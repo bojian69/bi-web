@@ -26,9 +26,7 @@ class SQLEditor {
     }
     
     createEditor() {
-        const defaultSQL = this.options.value || `SELECT ref_field as label, count(*) as 'value' 
-FROM pro_refs 
-GROUP BY ref_field;`;
+        const defaultSQL = this.options.value || `SELECT ref_field as label, count(*) as 'value' FROM pro_refs GROUP BY ref_field;`;
         const editorId = this.containerId.replace('sql-editor-', '');
         
         this.container.innerHTML = `
@@ -270,9 +268,7 @@ GROUP BY ref_field;`;
         const saved = localStorage.getItem(`sql_query_${queryId}`);
         if (saved && saved.trim() !== '') {
             // 如果有保存的查询且不是默认的，则使用保存的
-            const defaultSQL = `SELECT ref_field as label, count(*) as 'value' 
-FROM pro_refs 
-GROUP BY ref_field;`;
+            const defaultSQL = `SELECT ref_field as label, count(*) as 'value' FROM pro_refs GROUP BY ref_field;`;
             if (saved !== defaultSQL) {
                 this.setValue(saved);
             }

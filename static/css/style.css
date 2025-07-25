@@ -13,7 +13,7 @@ body {
 }
 
 h1 {
-    color: #2c3e50;
+    color: #060606;
     text-align: center;
     margin-bottom: 30px;
     padding-bottom: 15px;
@@ -193,7 +193,7 @@ canvas {
 }
 
 #comparison-result h2, #analysis-report h2 {
-    color: #2c3e50;
+    color: #ffffff;
     margin-top: 0;
     padding-bottom: 10px;
     border-bottom: 2px solid #eee;
@@ -251,7 +251,7 @@ canvas {
 .stat-value {
     font-size: 24px;
     font-weight: bold;
-    color: #2c3e50;
+    color: #ffffff;
 }
 
 .stat-label {
@@ -378,7 +378,7 @@ canvas {
 }
 
 .tab {
-    padding: 10px 20px;
+    padding: 10px 15px;
     background-color: #f8f9fa;
     border: 1px solid #ddd;
     border-bottom: none;
@@ -387,6 +387,11 @@ canvas {
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+    justify-content: space-between;
 }
 
 .tab:hover {
@@ -402,13 +407,29 @@ canvas {
 
 .tab .close-tab {
     margin-left: 10px;
-    font-size: 14px;
-    opacity: 0.7;
-    transition: opacity 0.3s;
+    font-size: 12px;
+    opacity: 0.6;
+    transition: all 0.3s;
+    padding: 2px 4px;
+    border-radius: 3px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .tab .close-tab:hover {
     opacity: 1;
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.tab.active .close-tab {
+    color: white;
+}
+
+.tab.active .close-tab:hover {
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 .new-tab {
@@ -452,7 +473,7 @@ canvas {
 
 .excel-import h3 {
     margin-top: 0;
-    color: #2c3e50;
+    color: #ffffff;
 }
 
 /* Excel预览表格 */
@@ -540,7 +561,7 @@ canvas {
 }
 
 .import-cancel {
-    background: #6c757d;
+    background: #ffffff;
     color: white;
 }
 
