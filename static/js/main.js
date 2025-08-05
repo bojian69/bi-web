@@ -1,6 +1,6 @@
 // 全局变量
 let queryResults = {}; // 存储所有查询结果
-let queryCount = 1; // 当前查询数量
+let queryCount = 3; // 当前查询数量
 let activeTab = 1; // 当前激活的标签页
 
 // 获取SQL查询内容

@@ -63,6 +63,14 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
                 <i class="fas fa-database"></i> 查询 1
                 <span class="close-tab" onclick="removeQuery(1, event)"><i class="fas fa-times"></i></span>
             </div>
+            <div class="tab" data-tab="2" onclick="switchTab(2)">
+                <i class="fas fa-database"></i> 查询 2
+                <span class="close-tab" onclick="removeQuery(2, event)"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="tab" data-tab="3" onclick="switchTab(3)">
+                <i class="fas fa-database"></i> 查询 3
+                <span class="close-tab" onclick="removeQuery(3, event)"><i class="fas fa-times"></i></span>
+            </div>
             <button class="new-tab" onclick="addQuery()">
                 <i class="fas fa-plus"></i> 新查询
             </button>
@@ -77,6 +85,34 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
                         <i class="fas fa-play"></i> 执行查询
                     </button>
                     <button class="save-btn" onclick="saveQuery(1)">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
+                <div class="error"></div>
+                <div class="visual-controls" style="display:none;"></div>
+                <div class="result"></div>
+            </div>
+            <div class="query-container" id="query-2">
+                <div class="sql-editor-container" id="sql-editor-2"></div>
+                <div class="query-actions">
+                    <button class="execute-btn" onclick="executeQuery(2)">
+                        <i class="fas fa-play"></i> 执行查询
+                    </button>
+                    <button class="save-btn" onclick="saveQuery(2)">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
+                <div class="error"></div>
+                <div class="visual-controls" style="display:none;"></div>
+                <div class="result"></div>
+            </div>
+            <div class="query-container" id="query-3">
+                <div class="sql-editor-container" id="sql-editor-3"></div>
+                <div class="query-actions">
+                    <button class="execute-btn" onclick="executeQuery(3)">
+                        <i class="fas fa-play"></i> 执行查询
+                    </button>
+                    <button class="save-btn" onclick="saveQuery(3)">
                         <i class="fas fa-save"></i> 保存
                     </button>
                 </div>

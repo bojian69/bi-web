@@ -195,17 +195,20 @@ go run main.go
 
 ### 🐳 Docker部署
 
-#### 镜像推送到远程仓库
+#### 多架构镜像构建和推送
 
 ```bash
-# 使用推送脚本 (默认推送到Docker Hub)
-./scripts/push-docker.sh
+# 本地多架构构建 (支持 linux/amd64 和 linux/arm64)
+./scripts/build-multiarch.sh
 
-# 指定自定义仓库和标签
-./scripts/push-docker.sh registry.example.com/myuser v1.0.0
+# 指定标签
+./scripts/build-multiarch.sh v1.0.0
 
+# 推送多架构镜像到远程仓库
 ./scripts/push-docker.sh bojianli69 v25.7.23
 
+# 指定自定义仓库
+./scripts/push-docker.sh registry.example.com/myuser v1.0.0
 ```
 
 #### 单容器部署

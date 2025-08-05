@@ -13,7 +13,7 @@ RUN go mod download
 COPY . .
 
 # 构建二进制文件，添加优化标志
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -trimpath -o bi-web .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -trimpath -o bi-web .
 
 # 使用更小的运行时镜像
 FROM alpine:3.18
